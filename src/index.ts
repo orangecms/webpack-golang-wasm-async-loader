@@ -45,7 +45,8 @@ function loader(this: webpack.loader.LoaderContext, contents: string) {
       cb(err);
       return;
     }
-
+    // TODO: only here for debugging; remove later!
+    console.info({ goBin, args, opts, err });
     let out = readFileSync(outFile);
     unlinkSync(outFile);
     const emittedFilename = basename(this.resourcePath, ".go") + ".wasm";
