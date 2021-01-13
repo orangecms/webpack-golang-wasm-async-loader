@@ -71,7 +71,7 @@ function loader(this: webpack.loader.LoaderContext, contents: string) {
         "import gobridge from '",
         join(__dirname, "..", "dist", "gobridge.js"),
         "';",
-        proxyBuilder(emittedFilename)
+        proxyBuilder(outFile)
       ].join("")
     );
   });
