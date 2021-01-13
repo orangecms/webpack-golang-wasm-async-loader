@@ -9,9 +9,17 @@ export default gobridge(fetch('${filename}').then(response => response.arrayBuff
 
 const getGoBin = (root: string) => `${root}/bin/go`;
 
+const built: string[] = [];
+
 function loader(this: webpack.loader.LoaderContext, contents: string) {
   const cb = this.async();
 
+  if (built.includes(this.resourcePath)) {
+      console.info(`${this.resourcePath} has already been built`);
+      cb(new Error("nope"));
+      return;
+  }
+  built.push(this.resourcePath);
   let resourceDirectory = this.resourcePath.substr(0, this.resourcePath.lastIndexOf("/"));
   console.info({ resourceDirectory });
 
