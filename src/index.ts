@@ -37,6 +37,7 @@ function loader(this: webpack.loader.LoaderContext, contents: string) {
 
   const goBin = getGoBin(opts.env.GOROOT);
   const outFile = `${this.resourcePath}.wasm`;
+  // force rebuild (a); print commands (x); print package names (v)
   const args = ["build", "-x", "-a", "-v", "-o", outFile, this.resourcePath];  // TODO: remove this
   // const args = ["build", "-o", outFile, this.resourcePath];
 
