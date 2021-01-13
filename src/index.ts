@@ -13,6 +13,7 @@ function loader(this: webpack.loader.LoaderContext, contents: string) {
   const cb = this.async();
 
   let resourceDirectory = this.resourcePath.substr(0, this.resourcePath.lastIndexOf("/"));
+  console.info({ resourceDirectory });
 
   const opts = {
     env: {
