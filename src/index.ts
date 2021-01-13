@@ -63,7 +63,7 @@ function loader(this: webpack.loader.LoaderContext, contents: string) {
         "import gobridge from '",
         join(__dirname, "..", "dist", "gobridge.js"),
         "';",
-        proxyBuilder(outFile)
+        proxyBuilder('http://localhost:3000/go/main.go.wasm')
       ].join("")
     );
   });
