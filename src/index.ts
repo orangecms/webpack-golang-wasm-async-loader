@@ -9,19 +9,10 @@ export default gobridge(fetch('${filename}').then(response => response.arrayBuff
 
 const getGoBin = (root: string) => `${root}/bin/go`;
 
-const built: string[] = [];
-
 function loader(this: webpack.loader.LoaderContext, contents: string) {
   const cb = this.async();
 
-  if (built.includes(this.resourcePath)) {
-      console.info(`${this.resourcePath} has already been built`);
-      cb(new Error("nope"));
-      return;
-  }
-  built.push(this.resourcePath);
   let resourceDirectory = this.resourcePath.substr(0, this.resourcePath.lastIndexOf("/"));
-  console.info({ resourceDirectory });
 
   const opts = {
     env: {
@@ -33,21 +24,11 @@ function loader(this: webpack.loader.LoaderContext, contents: string) {
       GOARCH: "wasm"
     },
     cwd: resourceDirectory
-};
-
-  // TODO: remove debug code...
-  execFile("/usr/bin/env", [], opts, (err, out) => {
-      if (out) {
-          console.log(out);
-          return;
-      }
-  });
+  };
 
   const goBin = getGoBin(opts.env.GOROOT);
   const outFile = `${this.resourcePath}.wasm`;
-  // force rebuild (a); print commands (x); print package names (v)
-  const args = ["build", "-x", "-a", "-v", "-o", outFile, this.resourcePath];  // TODO: remove this
-  // const args = ["build", "-o", outFile, this.resourcePath];
+  const args = ["build", "-o", outFile, this.resourcePath];
 
   execFile(goBin, args, opts, (err) => {
     if (err) {
@@ -56,24 +37,27 @@ function loader(this: webpack.loader.LoaderContext, contents: string) {
     }
     // TODO: only here for debugging; remove later!
     console.info({ goBin, args, opts, err });
-    let out = readFileSync(outFile);
+
+    const out = readFileSync(outFile); // was `let`; necessary?
     unlinkSync(outFile);
-    const emittedFilename = basename(this.resourcePath, ".go") + ".wasm";
+
+    const emitFileBasename = basename(this.resourcePath, ".go");
+    const emittedFilename = `${emitFileBasename}.wasm`;
     this.emitFile(emittedFilename, out, null);
 
-    cb(
-      null,
-      [
-        "require('!",
-        // join(process.env.GOROOT, "/misc/wasm/wasm_exec.js"),
-        join(__dirname, "..", "lib", "wasm_exec.js"),
-        "');",
-        "import gobridge from '",
-        join(__dirname, "..", "dist", "gobridge.js"),
-        "';",
-        proxyBuilder('http://localhost:3000/go/main.go.wasm')
-      ].join("")
-    );
+    // TODO: join(process.env.GOROOT, "/misc/wasm/wasm_exec.js")
+    const libPath = join(__dirname, "..", "lib", "wasm_exec.js");
+    const bridgePath = join(__dirname, "..", "dist", "gobridge.js");
+    // FIXME: This `fetch` wants an absolute address!
+    // `__webpack_public_path__ + ${emittedFilename}`?
+    const proxied = `
+      require('!${libPath}');
+      import gobridge from '${bridgePath}';
+      const file = fetch('${emittedFilename}');
+      const buffer = file.then(res => res.arrayBuffer());
+      export default gobridge(buffer);
+    `;
+    cb(null, proxied);
   });
 }
 
