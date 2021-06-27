@@ -21,7 +21,8 @@
     "typescript": "^3.2.4"
   },
   "dependencies": {
-    "@types/webpack": "^4.4.23"
+    "@types/webpack": "^4.4.23",
+    "loader-utils": "^2.0.0"
   },
   "peerDependencies": {
     "webpack": "^4.29.0"
