@@ -6,7 +6,7 @@ import (
 	"errors"
 	"syscall/js"
 
-	"../../../gobridge"
+	"github.com/happybeing/webpack-golang-wasm-async-loader/gobridge"
 )
 
 var global = js.Global()
