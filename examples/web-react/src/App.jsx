@@ -4,9 +4,22 @@ import NumberInput from './NumberInput';
 
 const { add, fmap, raiseError, someValue } = wasm;
 
+const buffer = new ArrayBuffer(32);
+const indata = new Uint8Array(buffer);
+indata[0] = 42;
+indata[1] = 23;
+indata[2] = 255;
+indata[3] = 255;
+indata[4] = 13;
+indata[5] = 37;
+indata[6] = 0;
+indata[7] = 0;
+indata[8] = 255;
+indata[9] = 255;
+
 const Fmap = () => {
     const getFmap = async() => {
-        const encoded = await fmap(...[]);
+        const encoded = await fmap(indata);
         try {
             const data = JSON.parse(encoded);
             console.info({ data });
