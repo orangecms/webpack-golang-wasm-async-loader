@@ -2,7 +2,21 @@ import * as React from 'react';
 import wasm from './main.go';
 import NumberInput from './NumberInput';
 
-const { add, raiseError, someValue } = wasm;
+const { add, fmap, raiseError, someValue } = wasm;
+
+const Fmap = () => {
+    const getFmap = async() => {
+        const encoded = await fmap(...[]);
+        try {
+            const data = JSON.parse(encoded);
+            console.info({ data });
+
+        } catch (error) {
+            console.error({ error });
+        }
+    }
+    return <button onClick={getFmap}>Fmap</button>
+};
 
 class App extends React.Component {
     constructor(props) {
@@ -42,6 +56,7 @@ class App extends React.Component {
     render() {
         return (
             <div>
+                <Fmap />
                 <p>Enter a number in the box below, on change it will add all the numbers together. Click the button to add more input boxes.</p>
                 {this.state.value.map((value, index) =>
                     <NumberInput key={index} value={value} onChange={i => this.updateValue(index, i)} />
