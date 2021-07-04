@@ -19,6 +19,32 @@ indata[7] = 0;
 indata[8] = 255;
 indata[9] = 255;
 */
+
+const entryToEmoji = (e) => {
+  switch (e) {
+    case "zero": return "😶";
+    case "full": return "🆓";
+    case "used":
+    default:
+      return "📦";
+  }
+};
+
+const LayoutBlocks = ({ layout }) => {
+    return (
+      <table>
+        {layout.map(({ address, entries }) => (
+          <tr key={address}>
+            <td>{address}</td>
+            {entries.map((e, i) => (
+              <td key={i}>{entryToEmoji(e)}</td>
+            ))}
+          </tr>
+        ))}
+      </table>
+    );
+};
+
 const Fmap = () => {
   const [data, setData] = useState(null);
   const [
@@ -68,9 +94,7 @@ const Fmap = () => {
       <button onClick={() => openFileSelector()}>
         Select file
       </button>
-      <pre>
-        {JSON.stringify(data, null, 2)}
-      </pre>
+      {data && <LayoutBlocks layout={data.layout} />}
       {plainFiles.map(file => (
         <div key={file.name}>{file.name}</div>
       ))}
