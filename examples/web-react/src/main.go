@@ -39,8 +39,11 @@ func fmap(this js.Value, args []js.Value) (interface{}, error) {
 	var layout FlashLayout
 	var numBlocks, numFull, numZero int
 
-	// var slice []byte
+	// TODO: get size via args or figure out how we can retrieve it here
 	slice := make([]byte, 1024*1024*16)
+	// https://golang.org/src/syscall/js/js.go#L568
+	// > It returns the number of bytes copied, which will be the minimum of the
+	// > lengths of src and dst.
 	js.CopyBytesToGo(slice, args[0])
 	indata := bytes.NewReader(slice)
 
