@@ -1,10 +1,12 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useFilePicker } from 'use-file-picker';
 import wasm from './main.go';
 import NumberInput from './NumberInput';
 
 const { add, fmap, raiseError, someValue } = wasm;
 
-const buffer = new ArrayBuffer(32);
+/*
+const buffer = new ArrayBuffer(1024 * 1024 * 16);
 const indata = new Uint8Array(buffer);
 indata[0] = 42;
 indata[1] = 23;
@@ -16,19 +18,64 @@ indata[6] = 0;
 indata[7] = 0;
 indata[8] = 255;
 indata[9] = 255;
-
+*/
 const Fmap = () => {
-    const getFmap = async() => {
+  const [data, setData] = useState(null);
+  const [
+      openFileSelector,
+			{ filesContent, loading, errors, plainFiles, clear }
+  ] = useFilePicker({
+      multiple: true,
+      readAs: "ArrayBuffer",
+      // accept: ['.bin', '.rom'],
+      limitFilesConfig: { min: 1, max: 1 },
+      // minFileSize: 1, // in megabytes
+      maxFileSize: 16,
+      // readFilesContent: false, // ignores file content
+  });
+
+    const getFmap = async(indata) => {
         const encoded = await fmap(indata);
         try {
-            const data = JSON.parse(encoded);
-            console.info({ data });
-
+            const flashMap = JSON.parse(encoded);
+            // console.info({ flashMap });
+            setData(flashMap);
         } catch (error) {
             console.error({ error });
         }
     }
-    return <button onClick={getFmap}>Fmap</button>
+
+	useEffect(() => {
+    if (filesContent.length) {
+      getFmap(new Uint8Array(filesContent[0].content));
+    }
+  }, [filesContent]);
+
+  if (errors.length) {
+    return (
+      <div>
+        <button onClick={() => openFileSelector()}>Something went wrong, retry! </button>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+      <button onClick={() => openFileSelector()}>
+        Select file
+      </button>
+      <pre>
+        {JSON.stringify(data, null, 2)}
+      </pre>
+      {plainFiles.map(file => (
+        <div key={file.name}>{file.name}</div>
+      ))}
+    </div>
+  );
 };
 
 class App extends React.Component {

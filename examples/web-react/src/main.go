@@ -29,8 +29,8 @@ type FlashLayout struct {
 }
 
 func fmap(this js.Value, args []js.Value) (interface{}, error) {
-	blockSize := 2
-	rowLength := 4
+	blockSize := 4096
+	rowLength := 32
 
 	buffer := make([]byte, blockSize)
 	fullBlock := bytes.Repeat([]byte{0xff}, blockSize)
@@ -40,7 +40,7 @@ func fmap(this js.Value, args []js.Value) (interface{}, error) {
 	var numBlocks, numFull, numZero int
 
 	// var slice []byte
-	slice := make([]byte, 32)
+	slice := make([]byte, 1024*1024*16)
 	js.CopyBytesToGo(slice, args[0])
 	indata := bytes.NewReader(slice)
 
