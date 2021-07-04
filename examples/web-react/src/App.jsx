@@ -56,12 +56,12 @@ const Fmap = () => {
       // accept: ['.bin', '.rom'],
       limitFilesConfig: { min: 1, max: 1 },
       // minFileSize: 1, // in megabytes
-      maxFileSize: 16,
+      maxFileSize: 65,
       // readFilesContent: false, // ignores file content
   });
 
-    const getFmap = async(indata) => {
-        const encoded = await fmap(indata);
+    const getFmap = async(indata, size) => {
+        const encoded = await fmap(indata, size);
         try {
             const flashMap = JSON.parse(encoded);
             // console.info({ flashMap });
@@ -73,7 +73,10 @@ const Fmap = () => {
 
 	useEffect(() => {
     if (filesContent.length) {
-      getFmap(new Uint8Array(filesContent[0].content));
+      getFmap(
+          new Uint8Array(filesContent[0].content),
+          filesContent[0].content.byteLength
+      );
     }
   }, [filesContent]);
 
