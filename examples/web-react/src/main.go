@@ -11,6 +11,7 @@ import (
 	"syscall/js"
 
 	"github.com/happybeing/webpack-golang-wasm-async-loader/gobridge"
+	"github.com/linuxboot/fiano/pkg/uefi"
 )
 
 var global = js.Global()
@@ -26,6 +27,41 @@ type FlashLayout struct {
 	Full   int        `json:"full"`
 	Zero   int        `json:"zero"`
 	Used   int        `json:"used"`
+}
+
+type Dummy struct {
+	W io.Writer
+}
+
+func (v *Dummy) Run(f uefi.Firmware) error {
+	return f.Apply(v)
+}
+
+func (v *Dummy) Visit(f uefi.Firmware) error {
+	b, err := json.MarshalIndent(f, "", "")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(v.W, string(b))
+	return nil
+}
+
+func utka(this js.Value, args []js.Value) (interface{}, error) {
+	size := args[1].Int()
+	image := make([]byte, size)
+	js.CopyBytesToGo(image, args[0])
+	var cli []string
+	cli = append(cli, "json")
+	parsedRoot, err := uefi.Parse(image)
+	var res bytes.Buffer
+	dummy := &Dummy{
+		W: &res,
+	}
+	parsedRoot.Apply(dummy)
+	if err != nil {
+		return nil, err
+	}
+	return res.String(), nil
 }
 
 func fmap(this js.Value, args []js.Value) (interface{}, error) {
@@ -109,6 +145,7 @@ func main() {
 	println("Web Assembly is ready")
 	gobridge.RegisterCallback("add", add)
 	gobridge.RegisterCallback("fmap", fmap)
+	gobridge.RegisterCallback("utka", utka)
 	gobridge.RegisterCallback("raiseError", err)
 	gobridge.RegisterValue("someValue", "Hello World")
 	gobridge.RegisterValue("numericValue", 123)
