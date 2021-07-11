@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useFilePicker } from 'use-file-picker';
 import wasm from './main.go';
 
-const { add, fmap, raiseError, someValue } = wasm;
+const { add, fmap, utka, raiseError, someValue } = wasm;
 
 const entryToEmoji = (e) => {
   switch (e) {
@@ -31,6 +31,7 @@ const LayoutBlocks = ({ layout }) => (
 
 const Fmap = () => {
   const [data, setData] = useState(null);
+  const [utkRes, setUtkRes] = useState(null);
   const [
       openFileSelector,
 			{ filesContent, loading, errors, plainFiles, clear }
@@ -43,6 +44,15 @@ const Fmap = () => {
       maxFileSize: 65,
       // readFilesContent: false, // ignores file content
   });
+
+  const utkAnalyze = async(indata, size) => {
+    try {
+      const parsed = await utka(indata, size);
+      setUtkRes(JSON.parse(parsed));
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   const getFmap = async(indata, size) => {
     const encoded = await fmap(indata, size);
@@ -57,7 +67,7 @@ const Fmap = () => {
 
 	useEffect(() => {
     if (filesContent.length) {
-      getFmap(
+      utkAnalyze(
         new Uint8Array(filesContent[0].content),
         filesContent[0].content.byteLength
       );
@@ -84,6 +94,7 @@ const Fmap = () => {
       <button onClick={() => openFileSelector()}>
         Select file
       </button>
+      <pre>{JSON.stringify(utkRes, null, 2)}</pre>
       {data && <LayoutBlocks layout={data.layout} />}
     </div>
   );
@@ -92,7 +103,7 @@ const Fmap = () => {
 const App = () => (
   <div style={{ fontSize: 11 }}>
     <h1>
-      Flash map - visualize block usage of a firmware image
+      utk-web - analyze a firmware image
     </h1>
     <Fmap />
   </div>

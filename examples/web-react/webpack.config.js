@@ -6,7 +6,7 @@ const htmlPlugin = new HtmlWebPackPlugin({
   filename: "./index.html"
 });
 
-const ASSET_PATH = "/fmap/";
+const ASSET_PATH = "/utk-web2/";
 
 module.exports = {
   entry: "./src/index.jsx",
