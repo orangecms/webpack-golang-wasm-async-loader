@@ -30,6 +30,7 @@ const LayoutBlocks = ({ layout }) => (
 );
 
 const Fmap = () => {
+  const [error, setError] = useState(null);
   const [data, setData] = useState(null);
   const [utkRes, setUtkRes] = useState(null);
   const [
@@ -51,6 +52,7 @@ const Fmap = () => {
       setUtkRes(JSON.parse(parsed));
     } catch (e) {
       console.error(e);
+      setError(error.concat(e.message));
     }
   }
 
@@ -60,8 +62,9 @@ const Fmap = () => {
       const flashMap = JSON.parse(encoded);
       // console.info({ flashMap });
       setData(flashMap);
-    } catch (error) {
-      console.error({ error });
+    } catch (e) {
+      console.error(e);
+      setError(error.concat(e.message));
     }
   }
 
@@ -94,6 +97,7 @@ const Fmap = () => {
       <button onClick={() => openFileSelector()}>
         Select file
       </button>
+      {error && <pre>Error: {JSON.stringify(error, null, 2)}</pre>}
       <pre>{JSON.stringify(utkRes, null, 2)}</pre>
       {data && <LayoutBlocks layout={data.layout} />}
     </div>
