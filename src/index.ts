@@ -10,7 +10,7 @@ export default gobridge(fetch('${filename}').then(response => response.arrayBuff
 
 const getGoBin = (root: string) => `${root}/bin/go`;
 
-function loader(this: webpack.loader.LoaderContext, contents: string) {
+function loader(this: webpack.LoaderContext<any>, contents: string) {
   const options = getOptions(this);
   console.info({ options });
   const cb = this.async();

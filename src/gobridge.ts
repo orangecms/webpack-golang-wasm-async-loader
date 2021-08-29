@@ -36,7 +36,7 @@ export default function (getBytes: Promise<Buffer>) {
     {
       get: (_, key) => {
         return (...args: any) => {
-          return new Promise(async (resolve, reject) => {
+          return new Promise(async (resolve: (...msg: any[]) => void, reject) => {
             let run = () => {
               let cb = (err: any, ...msg: any[]) => (err ? reject(err) : resolve(...msg));
               bridge[key].apply(undefined, [...args, cb]);
